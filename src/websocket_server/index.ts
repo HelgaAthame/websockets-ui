@@ -1,17 +1,18 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as http from 'http';
+import { httpServer } from '../http_server/index.js';
+import { WebSocketServer } from 'ws';
+import { env } from 'process';
 
-export const websocketServer = http.createServer(function (req, res) {
-  const __dirname = path.resolve(path.dirname(''));
-  const file_path = __dirname + (req.url === '/' ? '/front/index.html' : '/front' + req.url);
-  fs.readFile(file_path, function (err, data) {
-      if (err) {
-          res.writeHead(404);
-          res.end(JSON.stringify(err));
-          return;
-      }
-      res.writeHead(200);
-      res.end(data);
+const port = Number(env.HTTP_PORT || 8181);
+
+const wss = new WebSocketServer({ port });
+
+wss.on('connection', function connection(ws) {
+  ws.on('message', function message(data) {
+    console.log('received: %s', data);
   });
+
+  ws.send('something');
 });
+
