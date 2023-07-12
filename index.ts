@@ -1,11 +1,11 @@
-import {WebSocketServer} from "ws";
-import {httpServer} from "./src/http_server/index.js";
+import { WebSocketServer } from "ws";
+import { httpServer } from "./src/http_server/index.js";
 
 const HTTP_PORT = process.env.HTTP_PORT || 8181;
 const WS_PORT = Number(process.env.WS_PORT || 3000);
-import {dataHandler} from "./src/handlers/handler.js";
+import { dataHandler } from "./src/handlers/handler.js";
 import { ClientType } from "./src/types/client.js";
-import { uuid } from "./src/helpers/uuid.js";
+import { id } from "./src/helpers/uuid.js";
 import { dataBase } from "./src/dataBase/dataBase.js";
 
 httpServer.listen(HTTP_PORT, () => {
@@ -24,7 +24,7 @@ wss.on("listening", () => {
 wss.on("connection", (ws: ClientType) => {
   console.log('New ws client connected!');
 
-  ws.index = uuid();
+  ws.index = id();
   dataBase.addClient(ws);
 
   ws.on("error", (err) => {

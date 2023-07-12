@@ -3,12 +3,15 @@ import { dataBase } from "../dataBase/dataBase.js";
 export const dataHandler = (message: string) => {
   const data = JSON.parse(message);
   console.log(`Command: ${data.type}`);
+  console.log(data);
   let result;
   switch (data.type) {
     case "reg":
       result = dataBase.reg(data.data);
       break;
     case "create_game":
+      break;
+    case "create_room":
       break;
     case "start_game":
       break;

@@ -74,6 +74,12 @@ class db {
   addClient (client: ClientType) {
     this.clients.push(client);
   }
+
+  createRoom () {
+    const newRoom = {
+      id: id();
+    }
+  }
 }
 
 export const dataBase = new db();
