@@ -1,3 +1,4 @@
+import { CustomWebsocket } from "../../index.js";
 import { ClientType } from "../types/client.js";
 
 type User = {
@@ -25,7 +26,7 @@ type RegOutput = {
 class db {
   users: User[];
   rooms: Room[];
-  clients: ClientType[];
+  clients: CustomWebsocket[];
   constructor() {
     this.users = [];
     this.rooms = [];
@@ -71,13 +72,12 @@ class db {
     };
   }
 
-  addClient (client: ClientType) {
+  addClient (client: CustomWebsocket) {
     this.clients.push(client);
   }
 
   createRoom () {
     const newRoom = {
-      id: id();
     }
   }
 }
