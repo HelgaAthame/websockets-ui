@@ -1,13 +1,12 @@
 import { WebSocketServer, WebSocket, createWebSocketStream } from "ws";
-import { httpServer } from "./src/http_server/index.js";
+import { httpServer } from "@/http_server/index.js";
 
 const HTTP_PORT = process.env.HTTP_PORT || 8181;
 const WS_PORT = Number(process.env.WS_PORT || 3000);
-import { dataHandler } from "./src/handlers/handler.js";
-import { ClientType } from "./src/types/client.js";
+import { dataHandler } from "@/handlers/handler.js";
+import { ClientType } from "@/types/client.js";
 import { id } from "./src/helpers/uuid.js";
 import { dataBase } from "./src/dataBase/dataBase.js";
-import { reqbody } from "./src/types/request.js";
 
 httpServer.listen(HTTP_PORT, () => {
   console.log(`Start static http server on the ${HTTP_PORT} port!`);

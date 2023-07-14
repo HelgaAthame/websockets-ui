@@ -3,13 +3,12 @@
     "version": "1.0.0",
     "description": "Template for the WebSocket remote control task",
     "main": "index.ts",
-    "type": "module",
     "scripts": {
         "start": "node ./index.ts",
         "start:dev": "nodemon ./index.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "author": "Andrei Auchynnikau",
+    "author": "Olga Khmaruk",
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
