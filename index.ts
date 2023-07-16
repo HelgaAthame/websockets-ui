@@ -1,4 +1,4 @@
-import {WebSocketServer, WebSocket, createWebSocketStream} from "ws";
+import ws, {WebSocketServer, WebSocket, createWebSocketStream} from "ws";
 import {httpServer} from "@/http_server/index.js";
 
 const HTTP_PORT = process.env.HTTP_PORT || 8181;
@@ -10,6 +10,11 @@ import {ResponseBody, RequestBody} from "@/types";
 import {
   addActiveGameWithBot,
   createResponse,
+  getCreateGameData,
+  getFinishData,
+  getTurnData,
+  getUpdateRoomData,
+  getUpdateWinnersData,
   regUser,
 } from "@/handlers";
 
@@ -76,8 +81,6 @@ wss.on("connection", async (ws) => {
           )
         );
         break;
-      case "create_game":
-        break;
       case "create_room":
         respBody = await updateRoom(ws.id);
         wss.clients.forEach((client) => {
@@ -112,7 +115,6 @@ wss.on("connection", async (ws) => {
         const respBody = startGame(reqbody, ws.id);
         let turnSent = 0;
         let counter = 0;
-
         const currentGame = dataBase.getActiveGameByPlayerIndex(ws.id);
         if (!currentGame) return;
 
@@ -132,8 +134,6 @@ wss.on("connection", async (ws) => {
           }
         });
         counter = 0;
-
-        /* If game with bot and bot goes first - send bot turn and autoattack */
         const bot = currentGame.players.find(
           (player) => player.index !== ws.id && player.isBot
         );
@@ -159,10 +159,6 @@ wss.on("connection", async (ws) => {
         turnSent = 0;
       }
         break;
-      case "start_game":
-        break;
-      case "turn":
-        break;
       case "single_play":
         new WebSocket(`ws://localhost:${WS_PORT}`);
         botIndex = ws.id;
@@ -170,10 +166,8 @@ wss.on("connection", async (ws) => {
       case "attack" || "randomAttack":
         respBody = await attack(reqbody);
         if (!respBody) return;
-
         const currentGame = dataBase.getActiveGameByPlayerIndex(ws.id);
         if (!currentGame) return;
-
         wss.clients.forEach((client) => {
           if (currentGame.players.some((player) => player.index === client.id)) {
             respBody.forEach((item) => {
@@ -194,8 +188,6 @@ wss.on("connection", async (ws) => {
             }
           }
         });
-
-        /* Check if game is with bot and if it is bot's turn */
         const bot = currentGame.players.find(
           (player) => player.index !== ws.id && player.isBot
         );
@@ -215,24 +207,14 @@ wss.on("connection", async (ws) => {
             }
           });
         }
-
-        /* When game is finished */
         if (currentGame.finished) {
           finished = true;
           dataBase.deleteActiveGame(currentGame);
-
-          /* Delete bot from dataBase and from ws connections after the game */
           if (botWS) {
             dataBase.deletePlayerByIndex(botWS.id);
             botWS.close();
           }
         }
-        break;
-      case "finish":
-        break;
-      case "update_room":
-        break;
-      case "update_winners":
         break;
       default:
         console.log("Incorrect command type");
@@ -249,8 +231,6 @@ wss.on("connection", async (ws) => {
       });
       finished = false;
     }
-  });
-
   });
 
   ws.on("close", () => {
