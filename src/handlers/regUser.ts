@@ -11,17 +11,17 @@ export const regUser = async (parsedBody: RequestBody, index: number) => {
   try {
     const player = dataBase.getPlayerByName(name);
     if (player.active) {
-      throw Error(errors.ERR_USER_IS_ALREADY_LOGGED_IN);
+      throw Error('User with such username already logged in');
     }
 
     if (player.password !== password) {
-      throw Error(errors.ERR_INCORRECT_PASSWORD);
+      throw Error('The password is not correct');
     }
     dataBase.toggleActivePlayer(player.index, true);
     dataBase.updatePlayerIndex(name, index);
   } catch (e) {
     if (e instanceof Error) {
-      if (e.message === errors.ERR_USER_DOES_NOT_EXIST) {
+      if (e.message === 'User with such username doesn\'t exist') {
         dataBase.addPlayer({name, password, index, isBot: false});
       } else {
         error = true;

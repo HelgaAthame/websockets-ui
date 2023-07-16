@@ -10,6 +10,7 @@ import {ResponseBody, RequestBody} from "@/types";
 import {
   addActiveGameWithBot,
   createResponse,
+  regUser,
 } from "@/handlers";
 
 httpServer.listen(HTTP_PORT, () => {
