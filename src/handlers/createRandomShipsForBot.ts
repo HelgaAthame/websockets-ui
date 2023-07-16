@@ -1,5 +1,11 @@
 import type { Ship } from '@/types';
-import { shipFieldPattern } from './../utils';
+
+const shipFieldPattern: Omit<Ship, 'direction' | 'position'>[] = [
+  { type: 'huge', length: 4 },
+  ...Array(2).fill({ type: 'large', length: 3 }),
+  ...Array(3).fill({ type: 'medium', length: 2 }),
+  ...Array(4).fill({ type: 'small', length: 1 }),
+];
 
 export const createRandomShipsForBot = (): Ship[] => {
   const fieldLength = 10;
