@@ -18,6 +18,7 @@ import {
   getUpdateRoomData,
   getUpdateWinnersData,
   regUser,
+  startGame,
   updateRoom,
 } from "@/handlers";
 
