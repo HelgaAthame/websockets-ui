@@ -3,13 +3,14 @@ import {httpServer} from "@/http_server/index.js";
 
 const HTTP_PORT = process.env.HTTP_PORT || 8181;
 const WS_PORT = Number(process.env.WS_PORT || 3000);
-import {dataHandler} from "@/handlers/handler.js";
-import {ClientType} from "@/types/client.js";
+
 import {id} from "./src/helpers/uuid.js";
 import {dataBase} from "./src/dataBase/dataBase.js";
-import {RequestBody} from "@/types/request.js";
-import {ResponseBody} from "@/types/response.js";
-import { addActiveGameWithBot } from "@/handlers/addActiveGameWithBot.js";
+import {ResponseBody, RequestBody} from "@/types";
+import {
+  addActiveGameWithBot,
+  createResponse,
+} from "@/handlers";
 
 httpServer.listen(HTTP_PORT, () => {
   console.log(`Start static http server on the ${HTTP_PORT} port!`);
@@ -53,25 +54,10 @@ wss.on("connection", async (ws) => {
     console.log(`New ws client with ID ${ws.id} connected!`);
   }
 
-  dataBase.addClient(ws);
-
   ws.on("error", (err) => {
     console.error(err);
   });
 
-  /*ws.on("message", (data) => {
-    const stringified = data.toString();
-    try {
-      const result = dataHandler(stringified);
-      if (result) {
-        const resStrngfd = JSON.stringify(result);
-        console.log(resStrngfd);
-        ws.send(resStrngfd);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  });*/
   stream.on("data", async (data) => {
     const reqbody: RequestBody = JSON.parse(data);
     console.log(reqbody);
