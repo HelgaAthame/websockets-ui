@@ -5,3 +5,6 @@ export * from "./createRandomShipsForBot";
 export * from "./regUser";
 export * from './getResponseData'
 export * from './updateRoom'
+export * from './createGame'
+export * from './checkShips'
+export * from './startGame'

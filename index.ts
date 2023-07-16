@@ -9,6 +9,8 @@ import {dataBase} from "./src/dataBase/dataBase.js";
 import {ResponseBody, RequestBody} from "@/types";
 import {
   addActiveGameWithBot,
+  checkGameShipsCounter,
+  createGame,
   createResponse,
   getCreateGameData,
   getFinishData,
