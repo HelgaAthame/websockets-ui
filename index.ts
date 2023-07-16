@@ -73,7 +73,7 @@ wss.on("connection", async (ws) => {
   stream.on("data", async (data) => {
     const reqbody: RequestBody = JSON.parse(data);
     console.log(reqbody);
-    let respBody: ResponseBody | ResponseBody[] | undefined;
+    let respBody: ResponseBody | undefined;
     switch (reqbody.type) {
       case "reg":
         respBody = await regUser(reqbody, ws.id);
@@ -107,7 +107,7 @@ wss.on("connection", async (ws) => {
                 )
               );
               if (room.roomUsers.some((player) => player.index === client.id)) {
-                respBody.data = JSON.stringify(
+                if (respBody) respBody.data = JSON.stringify(
                   getCreateGameData(roomId, client.id)
                 );
                 client.send(JSON.stringify(respBody));
@@ -170,13 +170,13 @@ wss.on("connection", async (ws) => {
         botIndex = ws.id;
         break;
       case "attack" || "randomAttack":
-        respBody = await attack(reqbody);
-        if (!respBody) return;
+        const arrRespBody: ResponseBody[] | undefined = await attack(reqbody);
+        if (!arrRespBody) return;
         const currentGame = dataBase.getActiveGameByPlayerIndex(ws.id);
         if (!currentGame) return;
         wss.clients.forEach((client) => {
           if (currentGame.players.some((player) => player.index === client.id)) {
-            respBody.forEach((item) => {
+            arrRespBody.forEach((item) => {
               client.send(JSON.stringify(item));
             });
             if (currentGame.finished) {
