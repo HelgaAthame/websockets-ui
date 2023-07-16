@@ -16,6 +16,7 @@ import {
   getUpdateRoomData,
   getUpdateWinnersData,
   regUser,
+  updateRoom,
 } from "@/handlers";
 
 httpServer.listen(HTTP_PORT, () => {
