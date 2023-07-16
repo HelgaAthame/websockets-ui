@@ -5,6 +5,7 @@
     "skipLibCheck": true,
     "target": "ES2017",
     "module": "NodeNext",
+    "moduleResolution": "Node16",
     "sourceMap": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -22,5 +23,5 @@
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.mjs"],
   "exclude": ["node_modules"],
-  "ts-node": { "esm": true, "experimentalSpecifierResolution": "node" }
+  "ts-node": {"esm": true, "experimentalSpecifierResolution": "node"}
 }
