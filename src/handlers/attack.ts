@@ -1,6 +1,6 @@
-import type { RequestBody, ResAttackData } from '@/types';
-import { createResponse } from '@/handlers';
-import {dataBase} from "@/dataBase";
+import type {RequestBody, ResAttackData} from "../types";
+import {createResponse} from "../handlers";
+import {dataBase} from "../dataBase";
 
 export const attack = async (parsedBody: RequestBody) => {
   const data = await JSON.parse(parsedBody.data);
@@ -10,14 +10,17 @@ export const attack = async (parsedBody: RequestBody) => {
   if (!resData) return;
 
   if (Array.isArray(resData)) {
-    return resData.map((data) => createResponse('attack', data));
+    return resData.map((data) => createResponse("attack", data));
   }
 
-  return [createResponse('attack', resData)];
+  return [createResponse("attack", resData)];
 };
 
-export const createBotAttack = (gameId: number, indexPlayer: number): RequestBody => ({
-  type: 'randomAttack',
+export const createBotAttack = (
+  gameId: number,
+  indexPlayer: number
+): RequestBody => ({
+  type: "randomAttack",
   data: JSON.stringify({
     gameId,
     indexPlayer,
@@ -31,10 +34,14 @@ export const makeAttack = (attackData: {
   y: number;
   indexPlayer: number;
 }) => {
-  const { gameId, indexPlayer: currentPlayer } = attackData;
+  const {gameId, indexPlayer: currentPlayer} = attackData;
   const currentGame = dataBase.getActiveGameById(gameId);
-  const player = currentGame?.players.find((playerData) => playerData.index === currentPlayer);
-  const enemy = currentGame?.players.find((playerData) => playerData.index !== currentPlayer);
+  const player = currentGame?.players.find(
+    (playerData) => playerData.index === currentPlayer
+  );
+  const enemy = currentGame?.players.find(
+    (playerData) => playerData.index !== currentPlayer
+  );
   let x: number, y: number;
 
   /* Check if x and y were provided. If not, make random values,
@@ -43,7 +50,9 @@ export const makeAttack = (attackData: {
     do {
       x = Math.floor(Math.random() * 10);
       y = Math.floor(Math.random() * 10);
-    } while (player?.hittedFields.some((field) => field.x === x && field.y === y));
+    } while (
+      player?.hittedFields.some((field) => field.x === x && field.y === y)
+    );
   } else {
     x = attackData.x;
     y = attackData.y;
@@ -53,28 +62,33 @@ export const makeAttack = (attackData: {
   if (currentGame?.turn !== currentPlayer) return;
 
   /* Do not allow player to shoot same fields multiple times */
-  if (player?.hittedFields.find((field) => field.x === x && field.y === y)) return;
+  if (player?.hittedFields.find((field) => field.x === x && field.y === y))
+    return;
 
   /* If everything is fine push the field to hittedFields for check in next turns */
-  player?.hittedFields.push({ x, y });
+  player?.hittedFields.push({x, y});
 
-  let status: ResAttackData['status'] = 'miss';
+  let status: ResAttackData["status"] = "miss";
 
   const ship = enemy?.shipField.find((ship) => {
-    return ship.positions.some((position) => position.x === x && position.y === y);
+    return ship.positions.some(
+      (position) => position.x === x && position.y === y
+    );
   });
 
-  const position = ship?.positions.find((position) => position.x === x && position.y === y);
+  const position = ship?.positions.find(
+    (position) => position.x === x && position.y === y
+  );
 
   /* Change status to shot in case of match */
   if (position?.status) {
-    status = 'shot';
+    status = "shot";
     position.status = false;
   }
   /* Change status to killed in case of every ship's position was shot */
   if (ship?.positions.every((position) => !position.status)) {
     ship.killed = true;
-    status = 'killed';
+    status = "killed";
 
     /* Shoot empty fields around killed ship */
     const xPositions = new Set(ship.positions.map((position) => position.x));
@@ -91,8 +105,12 @@ export const makeAttack = (attackData: {
         const xPos = xMin + i - 1;
         const yPos = yMin + j - 1;
         if (
-          !ship.positions.some((position) => position.x === xPos && position.y === yPos) &&
-          !player?.hittedFields.some((field) => field.x === xPos && field.y === yPos) &&
+          !ship.positions.some(
+            (position) => position.x === xPos && position.y === yPos
+          ) &&
+          !player?.hittedFields.some(
+            (field) => field.x === xPos && field.y === yPos
+          ) &&
           xPos <= 9 &&
           xPos >= 0 &&
           yPos >= 0 &&
@@ -100,11 +118,11 @@ export const makeAttack = (attackData: {
         ) {
           /* Push those around fields to hitted fields so they are not
           shooted twice in case of random shooting / killing another ship close to them */
-          player?.hittedFields.push({ x: xPos, y: yPos });
+          player?.hittedFields.push({x: xPos, y: yPos});
           areaAround.push({
-            position: { x: xPos, y: yPos },
+            position: {x: xPos, y: yPos},
             currentPlayer,
-            status: 'miss',
+            status: "miss",
           });
         }
       }
@@ -121,9 +139,9 @@ export const makeAttack = (attackData: {
       if (!enemy?.isBot && !player?.isBot) dataBase.addWinner(currentPlayer);
     }
 
-    ship.positions.forEach(({ x, y }) => {
+    ship.positions.forEach(({x, y}) => {
       res.push({
-        position: { x, y },
+        position: {x, y},
         currentPlayer,
         status,
       });
@@ -131,12 +149,12 @@ export const makeAttack = (attackData: {
     return res.concat(areaAround);
   }
 
-  if (status === 'miss' && enemy) {
+  if (status === "miss" && enemy) {
     dataBase.setActiveGameTurn(currentGame, enemy.index);
   }
 
   const res: ResAttackData = {
-    position: { x, y },
+    position: {x, y},
     currentPlayer,
     status,
   };

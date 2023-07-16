@@ -1,4 +1,4 @@
-import type { ShipField } from '@/types';
+import type {ShipField} from "./ship";
 
 export type ActiveGame = {
   finished: boolean;
@@ -9,6 +9,6 @@ export type ActiveGame = {
     index: number;
     isBot?: boolean;
     shipField: ShipField;
-    hittedFields: { x: number; y: number }[];
+    hittedFields: {x: number; y: number}[];
   }[];
 };

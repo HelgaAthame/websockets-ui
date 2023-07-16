@@ -1,4 +1,4 @@
-import type {Player, Room, Winner, ActiveGame, ShipField} from "@/types";
+import type {Player, Room, Winner, ActiveGame, ShipField} from "../types";
 
 class db {
   players: Player[] = [];
@@ -16,7 +16,7 @@ class db {
 
   toggleActivePlayer(index: number, state: boolean) {
     const player = this.players.find((player) => player.index === index);
-    if (!player) throw Error('User with such username doesn\'t exist');
+    if (!player) throw Error("User with such username doesn't exist");
     player.active = state;
   }
 
@@ -35,7 +35,7 @@ class db {
 
   getPlayerByName(name: string) {
     const player = this.players.find((player) => player.name === name);
-    if (!player) throw Error('User with such username doesn\'t exist');
+    if (!player) throw Error("User with such username doesn't exist");
     return player;
   }
 

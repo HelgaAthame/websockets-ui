@@ -1,5 +1,5 @@
-import type {RequestBody, ResponseBody} from "@/types";
-import {dataBase} from "@/dataBase";
+import type {RequestBody, ResponseBody} from "../types";
+import {dataBase} from "../dataBase";
 
 export const createGame = async (parsedBody: RequestBody, idPlayer: number) => {
   const idGame = (await JSON.parse(parsedBody.data).indexRoom) as number;

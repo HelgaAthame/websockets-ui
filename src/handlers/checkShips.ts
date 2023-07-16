@@ -1,6 +1,6 @@
-import {dataBase} from "@/dataBase";
-import {calculateShipField} from "@/handlers";
-import type {RequestBody} from "@/types";
+import {dataBase} from "../dataBase";
+import {calculateShipField} from "../handlers";
+import type {RequestBody} from "../types";
 
 export const checkGameShipsCounter = (parsedBody: RequestBody) => {
   const {gameId, indexPlayer, ships} = JSON.parse(parsedBody.data);

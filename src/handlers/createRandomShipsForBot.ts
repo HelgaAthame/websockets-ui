@@ -1,16 +1,16 @@
-import type { Ship } from '@/types';
+import type {Ship} from "../types";
 
-const shipFieldPattern: Omit<Ship, 'direction' | 'position'>[] = [
-  { type: 'huge', length: 4 },
-  ...Array(2).fill({ type: 'large', length: 3 }),
-  ...Array(3).fill({ type: 'medium', length: 2 }),
-  ...Array(4).fill({ type: 'small', length: 1 }),
+const shipFieldPattern: Omit<Ship, "direction" | "position">[] = [
+  {type: "huge", length: 4},
+  ...Array(2).fill({type: "large", length: 3}),
+  ...Array(3).fill({type: "medium", length: 2}),
+  ...Array(4).fill({type: "small", length: 1}),
 ];
 
 export const createRandomShipsForBot = (): Ship[] => {
   const fieldLength = 10;
   const ships: Ship[] = [
-    { position: { x: -10, y: -10 }, direction: false, length: 1, type: 'small' },
+    {position: {x: -10, y: -10}, direction: false, length: 1, type: "small"},
   ];
 
   for (const potentialShip of shipFieldPattern) {
@@ -25,18 +25,22 @@ export const createRandomShipsForBot = (): Ship[] => {
           const potentialArea = [
             ...Array(potentialShip.length + 2)
               .fill(0)
-              .map((_item, index) => ({ x: x - 1, y: y + index - 1 })),
+              .map((_item, index) => ({x: x - 1, y: y + index - 1})),
             ...Array(potentialShip.length + 2)
               .fill(0)
-              .map((_item, index) => ({ x, y: y + index - 1 })),
+              .map((_item, index) => ({x, y: y + index - 1})),
             ...Array(potentialShip.length + 2)
               .fill(0)
-              .map((_item, index) => ({ x: x + 1, y: y + index - 1 })),
+              .map((_item, index) => ({x: x + 1, y: y + index - 1})),
           ];
 
           if (
             potentialArea.some(
-              (item) => item.x < -1 || item.x > fieldLength || item.y < -1 || item.y > fieldLength
+              (item) =>
+                item.x < -1 ||
+                item.x > fieldLength ||
+                item.y < -1 ||
+                item.y > fieldLength
             )
           )
             return true;
@@ -54,25 +58,30 @@ export const createRandomShipsForBot = (): Ship[] => {
             (v, i, a) => a.findIndex((v2) => v2.x === v.x && v2.y === v.y) === i
           );
 
-          if (checkArr.length !== [...potentialArea, ...shipArea].length) return true;
+          if (checkArr.length !== [...potentialArea, ...shipArea].length)
+            return true;
 
           /* horizontal */
         } else {
           const potentialArea = [
             ...Array(potentialShip.length + 2)
               .fill(0)
-              .map((_item, index) => ({ x: x + index - 1, y: y - 1 })),
+              .map((_item, index) => ({x: x + index - 1, y: y - 1})),
             ...Array(potentialShip.length + 2)
               .fill(0)
-              .map((_item, index) => ({ x: x + index - 1, y })),
+              .map((_item, index) => ({x: x + index - 1, y})),
             ...Array(potentialShip.length + 2)
               .fill(0)
-              .map((_item, index) => ({ x: x + index - 1, y: y + 1 })),
+              .map((_item, index) => ({x: x + index - 1, y: y + 1})),
           ];
 
           if (
             potentialArea.some(
-              (item) => item.x < -1 || item.x > fieldLength || item.y < -1 || item.y > fieldLength
+              (item) =>
+                item.x < -1 ||
+                item.x > fieldLength ||
+                item.y < -1 ||
+                item.y > fieldLength
             )
           )
             return true;
@@ -90,13 +99,14 @@ export const createRandomShipsForBot = (): Ship[] => {
             (v, i, a) => a.findIndex((v2) => v2.x === v.x && v2.y === v.y) === i
           );
 
-          if (checkArr.length !== [...potentialArea, ...shipArea].length) return true;
+          if (checkArr.length !== [...potentialArea, ...shipArea].length)
+            return true;
         }
         return false;
       })
     );
 
-    ships.push({ ...potentialShip, position: { x, y }, direction });
+    ships.push({...potentialShip, position: {x, y}, direction});
   }
 
   return ships.filter((item) => item.position.x !== -10);

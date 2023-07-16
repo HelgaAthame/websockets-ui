@@ -1,12 +1,11 @@
-import ws, {WebSocketServer, WebSocket, createWebSocketStream} from "ws";
-import {httpServer} from "@/http_server/index.js";
+import {WebSocketServer, WebSocket, createWebSocketStream} from "ws";
+import {httpServer} from "./src/http_server/index";
 
 const HTTP_PORT = process.env.HTTP_PORT || 8181;
 const WS_PORT = Number(process.env.WS_PORT || 3000);
 
-import {id} from "./src/helpers/uuid.js";
-import {dataBase} from "./src/dataBase/dataBase.js";
-import {ResponseBody, RequestBody} from "@/types";
+import {dataBase} from "./src/dataBase";
+import {ResponseBody, RequestBody} from "./src/types";
 import {
   addActiveGameWithBot,
   attack,
@@ -22,14 +21,14 @@ import {
   regUser,
   startGame,
   updateRoom,
-} from "@/handlers";
+} from "./src/handlers";
 
 httpServer.listen(HTTP_PORT, () => {
   console.log(`Start static http server on the ${HTTP_PORT} port!`);
 });
 
 export class CustomWebsocket extends WebSocket {
-  id = id();
+  id = Math.floor(Math.random() * 1000);
 }
 
 const wss = new WebSocketServer({
@@ -54,11 +53,11 @@ wss.on("connection", async (ws) => {
     const botHost = Array.from(wss.clients.values()).find(
       (client) => Number(client.id) === botIndex
     );
-    const roomId = await addActiveGameWithBot(ws.id);
+    const roomId = await addActiveGameWithBot(+ws.id);
     if (botHost)
       botHost.send(
         JSON.stringify(
-          createResponse("create_game", {idGame: roomId, idPlayer: botHost.id})
+          createResponse("create_game", {idGame: roomId, idPlayer: +botHost.id})
         )
       );
     botIndex = undefined;
@@ -76,7 +75,7 @@ wss.on("connection", async (ws) => {
     let respBody: ResponseBody | undefined;
     switch (reqbody.type) {
       case "reg":
-        respBody = await regUser(reqbody, ws.id);
+        respBody = await regUser(reqbody, +ws.id);
         stream.write(JSON.stringify(respBody));
         stream.write(
           JSON.stringify(createResponse("update_room", getUpdateRoomData()))
@@ -88,13 +87,13 @@ wss.on("connection", async (ws) => {
         );
         break;
       case "create_room":
-        respBody = await updateRoom(ws.id);
+        respBody = await updateRoom(+ws.id);
         wss.clients.forEach((client) => {
           client.send(JSON.stringify(respBody));
         });
         break;
       case "add_user_to_room":
-        respBody = await createGame(reqbody, ws.id);
+        respBody = await createGame(reqbody, +ws.id);
         if (respBody) {
           const roomId = Number(respBody.data);
           const room = dataBase.getRoomByRoomId(roomId);
@@ -106,76 +105,86 @@ wss.on("connection", async (ws) => {
                   createResponse("update_room", getUpdateRoomData())
                 )
               );
-              if (room.roomUsers.some((player) => player.index === client.id)) {
-                if (respBody) respBody.data = JSON.stringify(
-                  getCreateGameData(roomId, client.id)
-                );
+              if (
+                room.roomUsers.some((player) => player.index === +client.id)
+              ) {
+                if (respBody)
+                  respBody.data = JSON.stringify(
+                    getCreateGameData(roomId, +client.id)
+                  );
                 client.send(JSON.stringify(respBody));
               }
             });
           }
         }
         break;
-      case "add_ships":const sentShipsCounter = checkGameShipsCounter(reqbody);
-      if (sentShipsCounter === 2) {
-        const respBody = startGame(reqbody, ws.id);
-        let turnSent = 0;
-        let counter = 0;
-        const currentGame = dataBase.getActiveGameByPlayerIndex(ws.id);
-        if (!currentGame) return;
+      case "add_ships":
+        const sentShipsCounter = checkGameShipsCounter(reqbody);
+        if (sentShipsCounter === 2) {
+          const respBody = startGame(reqbody, +ws.id);
+          let turnSent = 0;
+          let counter = 0;
+          const currentGame = dataBase.getActiveGameByPlayerIndex(+ws.id);
+          if (!currentGame) return;
 
-        wss.clients.forEach((client) => {
-          if (
-            currentGame.players.some((player) => player.index === client.id)
-          ) {
-            client.send(JSON.stringify(respBody));
-            counter++;
-            if ((Math.random() > 0.5 || counter > 1) && !turnSent) {
-              dataBase.setActiveGameTurn(currentGame, client.id);
-              client.send(
-                JSON.stringify(createResponse("turn", getTurnData(client.id)))
-              );
-              turnSent = client.id;
-            }
-          }
-        });
-        counter = 0;
-        const bot = currentGame.players.find(
-          (player) => player.index !== ws.id && player.isBot
-        );
-        const botWS:CustomWebsocket | undefined = [
-          ...wss.clients.values(),
-        ].find((client) => client.id === bot?.index);
-        if (botWS && turnSent === botWS.id) {
-          const botAttackRes: ResponseBody[] | undefined = await attack(
-            createBotAttack(currentGame.gameId, botWS.id)
-          );
           wss.clients.forEach((client) => {
             if (
-              currentGame.players.some((player) => player.index === client.id)
+              currentGame.players.some((player) => player.index === +client.id)
             ) {
-              if (botAttackRes) {
-                botAttackRes.forEach((item) => {
-                  client.send(JSON.stringify(item));
-                });
+              client.send(JSON.stringify(respBody));
+              counter++;
+              if ((Math.random() > 0.5 || counter > 1) && !turnSent) {
+                dataBase.setActiveGameTurn(currentGame, +client.id);
+                client.send(
+                  JSON.stringify(
+                    createResponse("turn", getTurnData(+client.id))
+                  )
+                );
+                turnSent = +client.id;
               }
             }
           });
+          counter = 0;
+          const bot = currentGame.players.find(
+            (player) => player.index !== +ws.id && player.isBot
+          );
+          const botWS: CustomWebsocket | undefined = [
+            ...wss.clients.values(),
+          ].find((client) => +client.id === bot?.index);
+          if (botWS && turnSent === +botWS.id) {
+            const botAttackRes: ResponseBody[] | undefined = await attack(
+              createBotAttack(currentGame.gameId, +botWS.id)
+            );
+            wss.clients.forEach((client) => {
+              if (
+                currentGame.players.some(
+                  (player) => player.index === +client.id
+                )
+              ) {
+                if (botAttackRes) {
+                  botAttackRes.forEach((item) => {
+                    client.send(JSON.stringify(item));
+                  });
+                }
+              }
+            });
+          }
+          turnSent = 0;
         }
-        turnSent = 0;
-      }
         break;
       case "single_play":
         new WebSocket(`ws://localhost:${WS_PORT}`);
-        botIndex = ws.id;
+        botIndex = +ws.id;
         break;
       case "attack" || "randomAttack":
         const arrRespBody: ResponseBody[] | undefined = await attack(reqbody);
         if (!arrRespBody) return;
-        const currentGame = dataBase.getActiveGameByPlayerIndex(ws.id);
+        const currentGame = dataBase.getActiveGameByPlayerIndex(+ws.id);
         if (!currentGame) return;
         wss.clients.forEach((client) => {
-          if (currentGame.players.some((player) => player.index === client.id)) {
+          if (
+            currentGame.players.some((player) => player.index === +client.id)
+          ) {
             arrRespBody.forEach((item) => {
               client.send(JSON.stringify(item));
             });
@@ -195,15 +204,15 @@ wss.on("connection", async (ws) => {
           }
         });
         const bot = currentGame.players.find(
-          (player) => player.index !== ws.id && player.isBot
+          (player) => player.index !== +ws.id && player.isBot
         );
-        const botWS: CustomWebsocket | undefined = [...wss.clients.values()].find(
-          (client) => client.id === bot?.index
-        );
+        const botWS: CustomWebsocket | undefined = [
+          ...wss.clients.values(),
+        ].find((client) => +client.id === bot?.index);
 
-        if (botWS && currentGame.turn === botWS.id && !currentGame.finished) {
+        if (botWS && currentGame.turn === +botWS.id && !currentGame.finished) {
           const botAttackRes = await attack(
-            createBotAttack(currentGame.gameId, botWS.id)
+            createBotAttack(currentGame.gameId, +botWS.id)
           );
           wss.clients.forEach((client) => {
             if (botAttackRes) {
@@ -217,7 +226,7 @@ wss.on("connection", async (ws) => {
           finished = true;
           dataBase.deleteActiveGame(currentGame);
           if (botWS) {
-            dataBase.deletePlayerByIndex(botWS.id);
+            dataBase.deletePlayerByIndex(+botWS.id);
             botWS.close();
           }
         }
@@ -240,8 +249,8 @@ wss.on("connection", async (ws) => {
   });
 
   ws.on("close", () => {
-    dataBase.deleteRoom(ws.id);
-    dataBase.toggleActivePlayer(ws.id, false);
+    dataBase.deleteRoom(+ws.id);
+    dataBase.toggleActivePlayer(+ws.id, false);
     wss.clients.forEach((client) => {
       client.send(
         JSON.stringify(createResponse("update_room", getUpdateRoomData()))

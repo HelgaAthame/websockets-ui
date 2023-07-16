@@ -1,4 +1,4 @@
-import type { ResData, ResponseBody, RespType } from '@/types';
+import type {ResData, ResponseBody, RespType} from "../types";
 
 export const createResponse = (type: RespType, data: ResData): ResponseBody => {
   return {
