@@ -9,7 +9,9 @@ import {dataBase} from "./src/dataBase/dataBase.js";
 import {ResponseBody, RequestBody} from "@/types";
 import {
   addActiveGameWithBot,
+  attack,
   checkGameShipsCounter,
+  createBotAttack,
   createGame,
   createResponse,
   getCreateGameData,
@@ -71,7 +73,7 @@ wss.on("connection", async (ws) => {
   stream.on("data", async (data) => {
     const reqbody: RequestBody = JSON.parse(data);
     console.log(reqbody);
-    let respBody: ResponseBody;
+    let respBody: ResponseBody | ResponseBody[] | undefined;
     switch (reqbody.type) {
       case "reg":
         respBody = await regUser(reqbody, ws.id);

@@ -1,5 +1,6 @@
 import type { RequestBody, ResAttackData } from '@/types';
 import { createResponse } from '@/handlers';
+import {dataBase} from "@/dataBase";
 
 export const attack = async (parsedBody: RequestBody) => {
   const data = await JSON.parse(parsedBody.data);
@@ -31,7 +32,7 @@ export const makeAttack = (attackData: {
   indexPlayer: number;
 }) => {
   const { gameId, indexPlayer: currentPlayer } = attackData;
-  const currentGame = db.getActiveGameById(gameId);
+  const currentGame = dataBase.getActiveGameById(gameId);
   const player = currentGame?.players.find((playerData) => playerData.index === currentPlayer);
   const enemy = currentGame?.players.find((playerData) => playerData.index !== currentPlayer);
   let x: number, y: number;
@@ -116,8 +117,8 @@ export const makeAttack = (attackData: {
     const isWinner = enemy?.shipField.every((ship) => ship.killed);
 
     if (isWinner) {
-      db.setActiveGameFinished(currentGame);
-      if (!enemy?.isBot && !player?.isBot) db.addWinner(currentPlayer);
+      dataBase.setActiveGameFinished(currentGame);
+      if (!enemy?.isBot && !player?.isBot) dataBase.addWinner(currentPlayer);
     }
 
     ship.positions.forEach(({ x, y }) => {
@@ -131,7 +132,7 @@ export const makeAttack = (attackData: {
   }
 
   if (status === 'miss' && enemy) {
-    db.setActiveGameTurn(currentGame, enemy.index);
+    dataBase.setActiveGameTurn(currentGame, enemy.index);
   }
 
   const res: ResAttackData = {
