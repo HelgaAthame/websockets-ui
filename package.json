@@ -1,22 +1,26 @@
 {
-    "name": "ws_task",
-    "version": "1.0.0",
-    "description": "Template for the WebSocket remote control task",
-    "main": "index.js",
-    "type": "module",
-    "scripts": {
-        "start": "node ./index.js",
-        "start:dev": "nodemon ./index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "Andrei Auchynnikau",
-    "keywords": [],
-    "license": "ISC",
-    "devDependencies": {
-        "nodemon": "^2.0.16"
-    },
-    "dependencies": {
-        "@nut-tree/nut-js": "^2.3.0",
-        "ws": "^8.8.0"
-    }
+  "name": "ws_task",
+  "version": "1.0.0",
+  "description": "Template for the WebSocket remote control task",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node ./index.ts",
+    "start:dev": "nodemon ./index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Olga Khmaruk",
+  "keywords": [],
+  "license": "ISC",
+  "devDependencies": {
+    "@types/uuid": "^9.0.2",
+    "@types/ws": "^8.5.5",
+    "nodemon": "^2.0.16",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6",
+    "uuid": "^9.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "ws": "^8.13.0"
+  }
 }
